@@ -1,7 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import AddTodoForm from "./components/Todos/AddTodoForm";
 import TodoList from "./components/Todos/TodoList";
-import { useSelector } from "react-redux";
 
 function App() {
   return (
