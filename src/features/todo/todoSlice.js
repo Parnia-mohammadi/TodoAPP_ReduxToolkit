@@ -12,7 +12,7 @@ export const getAsyncTodo = createAsyncThunk(
   "todo/getAsyncTodo",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await api.get("/todos");
+      const { data } = await api.get("todos");
       return data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -24,8 +24,8 @@ export const addAsyncTodo = createAsyncThunk(
   "todo/addAsyncTodo",
   async (payload, { rejectWithValue }) => {
     try {
-      const { data } = await api.post("/todos", {
-        title: payload,
+      const { data } = await api.post("todos", {
+        title: payload.title,
         id: Date.now(),
         complete: false,
       });
@@ -81,7 +81,6 @@ const todoSlice = createSlice({
       }),
       builder.addCase(addAsyncTodo.rejected, (state, action) => {
         state.loading = false;
-        state.todos = [];
         state.error = action.payload;
       });
   },

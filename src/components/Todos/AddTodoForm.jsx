@@ -9,7 +9,7 @@ const AddTodoForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!value) return;
-    dispatch(addAsyncTodo({ title: value }));
+    dispatch(addAsyncTodo({title :value}));
     setValue("");
   };
   return (
