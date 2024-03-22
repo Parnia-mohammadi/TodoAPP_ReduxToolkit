@@ -27,7 +27,7 @@ export const addAsyncTodo = createAsyncThunk(
       const { data } = await api.post("todos", {
         title: payload.title,
         id: Date.now(),
-        complete: false,
+        completed: false,
       });
       return data;
     } catch (error) {
@@ -42,6 +42,20 @@ export const deleteAsyncTodo = createAsyncThunk(
     try {
       await api.delete(`todos/${payload.id}`);
       return { id: payload.id };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const toggleAsyncTodo = createAsyncThunk(
+  "todo/toggleAsyncTodo",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const {data} = await api.patch(`todos/${payload.id}`, {
+        completed: payload.completed,
+      });
+      return data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -106,6 +120,19 @@ const todoSlice = createSlice({
         state.error = "";
       }),
       builder.addCase(deleteAsyncTodo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      }),
+      builder.addCase(toggleAsyncTodo.pending, (state, action) => {
+        state.loading = true;
+      }),
+      builder.addCase(toggleAsyncTodo.fulfilled, (state, action) => {
+        state.loading = false;
+        const selectedTodo = state.todos.find(todo=>todo.id ==action.payload.id);
+        selectedTodo.completed = action.payload.completed;
+        state.error = "";
+      }),
+      builder.addCase(toggleAsyncTodo.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
