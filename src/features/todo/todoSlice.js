@@ -12,7 +12,7 @@ export const getAsyncTodo = createAsyncThunk(
   "todo/getAsyncTodo",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await api.get("/todos");
+      const { data } = await api.get("todos");
       return data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -24,10 +24,36 @@ export const addAsyncTodo = createAsyncThunk(
   "todo/addAsyncTodo",
   async (payload, { rejectWithValue }) => {
     try {
-      const { data } = await api.post("/todos", {
-        title: payload,
+      const { data } = await api.post("todos", {
+        title: payload.title,
         id: Date.now(),
-        complete: false,
+        completed: false,
+      });
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const deleteAsyncTodo = createAsyncThunk(
+  "todo/deleteAsyncTodo",
+  async (payload, { rejectWithValue }) => {
+    try {
+      await api.delete(`todos/${payload.id}`);
+      return { id: payload.id };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const toggleAsyncTodo = createAsyncThunk(
+  "todo/toggleAsyncTodo",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const {data} = await api.patch(`todos/${payload.id}`, {
+        completed: payload.completed,
       });
       return data;
     } catch (error) {
@@ -81,7 +107,33 @@ const todoSlice = createSlice({
       }),
       builder.addCase(addAsyncTodo.rejected, (state, action) => {
         state.loading = false;
-        state.todos = [];
+        state.error = action.payload;
+      }),
+      builder.addCase(deleteAsyncTodo.pending, (state, action) => {
+        state.loading = true;
+      }),
+      builder.addCase(deleteAsyncTodo.fulfilled, (state, action) => {
+        state.loading = false;
+        state.todos = state.todos.filter(
+          (item) => item.id != action.payload.id
+        );
+        state.error = "";
+      }),
+      builder.addCase(deleteAsyncTodo.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      }),
+      builder.addCase(toggleAsyncTodo.pending, (state, action) => {
+        state.loading = true;
+      }),
+      builder.addCase(toggleAsyncTodo.fulfilled, (state, action) => {
+        state.loading = false;
+        const selectedTodo = state.todos.find(todo=>todo.id ==action.payload.id);
+        selectedTodo.completed = action.payload.completed;
+        state.error = "";
+      }),
+      builder.addCase(toggleAsyncTodo.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       });
   },
